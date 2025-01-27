@@ -17,3 +17,22 @@ def build_model(
         return descriptor, feature_size, efficientnet_v2.efficientnet_v2_m_transform()
     else:
         raise Exception(f"Invalid model {model_identifier}")
+
+
+def generate_feature_list(
+    dataset: torch.utils.data.Dataset,
+    descriptor: torch.nn.Module,
+    batch_size: int = 32 if torch.cuda.is_available() else os.cpu_count(),
+    device=torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"),
+):
+    with torch.no_grad():
+        descriptor = descriptor.to(device)
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
+
+        feature_list = torch.Tensor()
+
+        for images in dataloader:
+            features = descriptor(images.to(device))
+            feature_list = torch.concat([feature_list, features.cpu()])
+
+        return feature_list.cpu()
