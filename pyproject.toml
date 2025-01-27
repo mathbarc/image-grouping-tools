@@ -15,6 +15,7 @@ dependencies = [
     "scikit-learn",
     "matplotlib",
     "click",
+    "tqdm",
 ]
 
 [project.urls]

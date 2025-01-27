@@ -6,6 +6,7 @@ import torch
 import torchvision
 
 import os
+import tqdm
 
 
 def build_model(
@@ -33,7 +34,7 @@ def generate_feature_list(
 
         feature_list = torch.Tensor()
 
-        for images in dataloader:
+        for images in tqdm.tqdm(dataloader):
             features = descriptor(images.to(device))
             feature_list = torch.concat([feature_list, features.cpu()])
 

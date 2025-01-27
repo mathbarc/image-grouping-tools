@@ -83,3 +83,39 @@ def apply_pca(data_file: str, n_components: int, output: str):
 
     torch.save(output_data, output)
     return output_data
+
+
+from sklearn.cluster import DBSCAN
+
+
+@cli.command(name="cluster")
+@click.argument("data_file", nargs=1, type=str)
+@click.option(
+    "--min_samples",
+    required=False,
+    help="Minimum number of samples on a neighborhood of a core point",
+    default=3,
+    type=int,
+)
+@click.option(
+    "--eps",
+    required=False,
+    help="Size of the neighborhood arround each sample",
+    default=2.0,
+    type=float,
+)
+def cluster(data_file: str, min_samples: int, eps: float):
+    data = torch.load(data_file)
+    cluster_alg = DBSCAN(min_samples=min_samples, eps=eps)
+    result = cluster_alg.fit_predict(data["features"])
+    out_path = os.path.splitext(data_file)[0] + "_cluster"
+    scatterplot_samples(
+        data["features"],
+        data["model_id"],
+        data["kept_variance"],
+        data["paths"],
+        out_path,
+        result,
+    )
+    data["clusters"] = result
+    torch.save(data, out_path + ".pt")
