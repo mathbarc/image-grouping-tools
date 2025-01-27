@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "image-grouping-tool"
+description = "Python library for analisys and clustering of images"
+requires-python = ">=3.9"
+dynamic = ["version"]
+keywords = ['image', 'clustering', 'image analysis']
+dependencies = ["numpy>=2.0.2", "torch>=2.4.0", "click"]
+
+[project.urls]
+Homepage = 'https://github.com/mathbarc/image-grouping-tools'
+
+[project.optional-dependencies]
+dev = ["pylint>=2.10", "black>=23.3.0"]
+tests = ["pytest>=7.3.1", "pytest-cov>=4.0.0"]
+docs = ["sphinx>=5.0.1", "sphinx-markdown-builder", "sphinx_rtd_theme>=1.0.0"]
+
+[tool.pylint]
+max-line-length = 88
+disable = [
+    "C0103", # (invalid-name)
+    "C0114", # (missing-module-docstring)
+    "C0115", # (missing-class-docstring)
+    "C0116", # (missing-function-docstring)
+    "R0903", # (too-few-public-methods)
+    "R0913", # (too-many-arguments)
+    "W0105", # (pointless-string-statement)
+    "W0621", # (redefining outer scope variable)
+]
+
+
+[tool.setuptools.dynamic]
+version = { attr = "image_grouping_tool.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests*"]
+
+[tool.pytest.ini_options]
+minversion = "7.3.1"
+pythonpath = "image_grouping_tool"
+addopts = "--cov=image_grouping_tool --cov-report=xml --cov-report=term -v"
+
+[tool.coverage.run]
+source = ["image_grouping_tool"]
+relative_files = true
+branch = true
