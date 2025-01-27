@@ -2,7 +2,7 @@ name: Python package
 
 on:
   push:
-    tags: ["*"]
+    branches: ["main"]
 
 jobs:
   build:
