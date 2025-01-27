@@ -4,7 +4,13 @@ import matplotlib.pyplot as plt
 import os
 
 
-def scatterplot_samples(feature_vector: numpy.ndarray, model_id, paths: List[str]):
+def scatterplot_samples(
+    feature_vector: numpy.ndarray,
+    model_id,
+    kept_var: float,
+    paths: List[str],
+    graph_path: str,
+):
     plt.figure(figsize=(8, 6))
     plt.scatter(feature_vector[:, 0], feature_vector[:, 1])
 
@@ -16,5 +22,8 @@ def scatterplot_samples(feature_vector: numpy.ndarray, model_id, paths: List[str
 
     plt.xlabel("Principal Component 1")
     plt.ylabel("Principal Component 2")
-    plt.title(f"PCA of {model_id} Embeddings")
+    plt.title(
+        f"PCA of {model_id} Embeddings ( kept variance: {round(kept_var * 100)}% )"
+    )
+    plt.savefig(graph_path + ".png")
     plt.show()

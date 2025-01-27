@@ -5,6 +5,8 @@ from typing import Tuple
 import torch
 import torchvision
 
+import os
+
 
 def build_model(
     model_identifier: str,

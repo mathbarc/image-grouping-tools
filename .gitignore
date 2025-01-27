@@ -3,3 +3,5 @@
 coverage.xml
 **/__pycache__/
 image_grouping_tool.egg-info/
+**.pt
+**.png
