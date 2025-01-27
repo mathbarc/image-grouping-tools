@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "image-grouping-tool"
 description = "Python library for analisys and clustering of images"
 requires-python = ">=3.9"
-readme = "README.rst"
+readme = "README.md"
 dynamic = ["version"]
 keywords = ['image', 'clustering', 'image analysis']
 dependencies = [
