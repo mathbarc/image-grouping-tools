@@ -1,8 +1,9 @@
 from typing import Optional
 import torch
+from torch.utils import data
 from torch.utils.data import Dataset
 
-from glob import glob
+from pathlib import Path
 import torchvision
 from torchvision.io import read_image
 import os
@@ -13,10 +14,11 @@ class ImageFolderDataset(Dataset):
         self, path: str, transform: Optional[torchvision.transforms.Compose] = None
     ) -> None:
         super().__init__()
+        data_path = Path(path)
         self.image_list = []
-        self.image_list.extend(glob("*.png", root_dir=path))
-        self.image_list.extend(glob("*.jpeg", root_dir=path))
-        self.image_list.extend(glob("*.jpg", root_dir=path))
+        self.image_list.extend(data_path.glob("**/*.png"))
+        self.image_list.extend(data_path.glob("**/*.jpeg"))
+        self.image_list.extend(data_path.glob("**/*.jpg"))
 
         self.image_list = [os.path.join(path, img_path) for img_path in self.image_list]
         self.transform = transform

@@ -6,7 +6,7 @@ from sklearn.decomposition import PCA
 def calculate_var(data: numpy.ndarray):
     mean_val = numpy.mean(data, axis=0)
     diff = data - mean_val
-    return numpy.mean(numpy.sqrt(numpy.pow(diff, 2).sum()))
+    return numpy.mean(numpy.sqrt(numpy.power(diff, 2).sum()))
 
 
 def pca(feature_vector: numpy.ndarray, n_components: int) -> (numpy.ndarray, float):
