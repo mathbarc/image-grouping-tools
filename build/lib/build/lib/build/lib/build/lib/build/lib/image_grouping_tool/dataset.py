@@ -23,7 +23,7 @@ class ImageFolderDataset(Dataset):
 
     def __getitem__(self, idx) -> torch.Tensor:
         img = read_image(
-            self.image_list[idx], torchvision.io.ImageReadMode.RGB
+            str(self.image_list[idx]), torchvision.io.ImageReadMode.RGB
         ).float() * (1.0 / 255.0)
 
         if self.transform is not None:

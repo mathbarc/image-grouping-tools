@@ -6,3 +6,4 @@ image_grouping_tool.egg-info/
 **.pt
 **.png
 venv/
+build/

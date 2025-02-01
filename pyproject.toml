@@ -10,10 +10,10 @@ readme = "README.md"
 dynamic = ["version"]
 keywords = ['image', 'clustering', 'image analysis']
 dependencies = [
-    "numpy>=2.0.2",
-    "torch>=2.4.0",
-    "torchvision",
-    "scikit-learn",
+    "numpy==1.26.4",
+    "torch==2.2.2",
+    "torchvision==0.17.2",
+    "scikit-learn==1.6.1",
     "matplotlib",
     "click",
     "tqdm",
