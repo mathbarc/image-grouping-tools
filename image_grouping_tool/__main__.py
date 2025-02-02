@@ -64,7 +64,7 @@ def compute_features(image_folder: str, batch_size: int, model_id: str, output: 
     type=str,
 )
 def apply_pca(data_file: str, n_components: int, output: str):
-    data = torch.load(data_file)
+    data = torch.load(data_file, weights_only=False)
     features, kept_variance = pca(data["features"].numpy(), n_components)
     output_data = {
         "features": features,
@@ -105,7 +105,7 @@ from sklearn.cluster import DBSCAN
     type=float,
 )
 def cluster(data_file: str, min_samples: int, eps: float):
-    data = torch.load(data_file)
+    data = torch.load(data_file, weights_only=False)
     cluster_alg = DBSCAN(min_samples=min_samples, eps=eps)
     result = cluster_alg.fit_predict(data["features"])
     out_path = os.path.splitext(data_file)[0] + "_cluster"

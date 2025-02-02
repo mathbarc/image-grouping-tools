@@ -19,13 +19,11 @@ class ImageFolderDataset(Dataset):
         self.image_list.extend(data_path.glob("**/*.png"))
         self.image_list.extend(data_path.glob("**/*.jpeg"))
         self.image_list.extend(data_path.glob("**/*.jpg"))
-
-        self.image_list = [os.path.join(path, img_path) for img_path in self.image_list]
         self.transform = transform
 
     def __getitem__(self, idx) -> torch.Tensor:
         img = read_image(
-            self.image_list[idx], torchvision.io.ImageReadMode.RGB
+            str(self.image_list[idx]), torchvision.io.ImageReadMode.RGB
         ).float() * (1.0 / 255.0)
 
         if self.transform is not None:
