@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -40,9 +40,7 @@ disable = [
     "W0621", # (redefining outer scope variable)
 ]
 
-
-[tool.setuptools.dynamic]
-version = { attr = "image_grouping_tool.__version__" }
+[tool.setuptools_scm]
 
 [tool.setuptools.packages.find]
 where = ["."]
