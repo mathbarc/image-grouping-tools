@@ -142,6 +142,15 @@ def cluster(
     out_path = os.path.splitext(data_file)[0] + "_cluster"
     data["clusters"] = result
     torch.save(data, out_path + ".pt")
+    if data["features"].shape[1] == 2 and not not_show:
+        scatterplot_samples(
+            data["features"],
+            data["model_id"],
+            data["kept_variance"],
+            data["paths"],
+            out_path,
+            result,
+        )
 
 
 @cli.command(name="compute_distances")
