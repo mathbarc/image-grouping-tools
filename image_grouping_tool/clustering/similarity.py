@@ -10,7 +10,7 @@ from .distance_functions import (euclidian_distance,
 functions = {
     "euclidian": euclidian_distance,
     "cosine": cosine_distance,
-    "minkowski": minkowski_distance,
+    "minkowski": minkowski_distance(5),
     "mahalanobis": mahalanobis_distance
 }
 

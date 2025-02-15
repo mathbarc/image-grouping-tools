@@ -143,5 +143,4 @@ def compute_distances(features_path: str, images: tuple, dist: str, output: str)
     data[f"{dist}-reference_images"] = images
     data[f"{dist}-sorted_idx"] = sorted_idx
     torch.save(data, output)
-    data = torch.load(features_path, weights_only=False)
     return data
