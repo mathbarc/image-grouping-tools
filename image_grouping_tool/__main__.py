@@ -1,5 +1,3 @@
-from numpy import require
-from torchvision import models
 from image_grouping_tool import __version__
 from image_grouping_tool.dataset import ImageFolderDataset
 from image_grouping_tool.clustering.similarity import get_distances
@@ -64,8 +62,10 @@ def compute_features(image_folder: str, batch_size: int, model_id: str, output: 
     default="./features_pca.pt",
     type=str,
 )
-def apply_pca(data_file: str, n_components: int, output: str):
+@click.option("--not_show", required=False, is_flag=True)
+def apply_pca(data_file: str, n_components: int, output: str, not_show: bool):
     data = torch.load(data_file, weights_only=False)
+
     features, kept_variance = pca(data["features"].numpy(), n_components)
     output_data = {
         "features": features,
@@ -73,51 +73,73 @@ def apply_pca(data_file: str, n_components: int, output: str):
         "kept_variance": kept_variance,
         "model_id": data["model_id"],
     }
-
-    scatterplot_samples(
-        features,
-        data["model_id"],
-        kept_variance,
-        data["paths"],
-        os.path.splitext(output)[0],
-    )
-
     torch.save(output_data, output)
+
+    if n_components == 2 and not not_show:
+        scatterplot_samples(
+            features,
+            data["model_id"],
+            kept_variance,
+            data["paths"],
+            os.path.splitext(output)[0],
+        )
+    else:
+        print(f"kept_variance: {kept_variance}")
+
     return output_data
 
 
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN, KMeans
 
 
 @cli.command(name="cluster")
 @click.argument("data_file", nargs=1, type=str)
 @click.option(
+    "--algorithm",
+    required=False,
+    help="clustering algorithm to be used (dbscan, kmeans)",
+    default="dbscan",
+    type=str,
+)
+@click.option(
     "--min_samples",
     required=False,
-    help="Minimum number of samples on a neighborhood of a core point",
+    help="Minimum number of samples on a neighborhood of a core point, used by dbscan algorithm",
     default=3,
     type=int,
 )
 @click.option(
     "--eps",
     required=False,
-    help="Size of the neighborhood arround each sample",
+    help="Size of the neighborhood arround each sample, used by dbscan algorithm",
     default=2.0,
     type=float,
 )
-def cluster(data_file: str, min_samples: int, eps: float):
+@click.option(
+    "--n_clusters",
+    required=False,
+    help="number of desired clusters, used by kmeans",
+    default=3,
+    type=int,
+)
+@click.option("--not_show", required=False, is_flag=True)
+def cluster(
+    data_file: str,
+    algorithm: str,
+    min_samples: int,
+    eps: float,
+    n_clusters: int,
+    not_show: bool,
+):
     data = torch.load(data_file, weights_only=False)
-    cluster_alg = DBSCAN(min_samples=min_samples, eps=eps)
+    if algorithm == "dbscan":
+        cluster_alg = DBSCAN(min_samples=min_samples, eps=eps)
+    elif algorithm == "kmeans":
+        cluster_alg = KMeans(n_clusters)
+    else:
+        raise Exception(f"Invalid clustering algorithm: {algorithm}")
     result = cluster_alg.fit_predict(data["features"])
     out_path = os.path.splitext(data_file)[0] + "_cluster"
-    scatterplot_samples(
-        data["features"],
-        data["model_id"],
-        data["kept_variance"],
-        data["paths"],
-        out_path,
-        result,
-    )
     data["clusters"] = result
     torch.save(data, out_path + ".pt")
 
