@@ -1,7 +1,9 @@
 from typing import List, Optional
 import numpy
-import matplotlib.pyplot as plt
 import os
+import plotly.graph_objects
+import plotly.offline
+import plotly.colors
 
 
 def scatterplot_samples(
@@ -13,29 +15,42 @@ def scatterplot_samples(
     cluster_ids: Optional[List[int]] = None,
 ):
     if cluster_ids is not None:
-        color_map = plt.cm.get_cmap("hsv")
-        cluster_ids = (cluster_ids - min(cluster_ids)) / (
-            max(cluster_ids) - min(cluster_ids)
+        min_cid = min(cluster_ids)
+        max_cid = max(cluster_ids)
+
+        if max_cid - min_cid < 1:
+            cluster_ids_value = None
+        else:
+            cluster_ids_value = (cluster_ids - min_cid) / (max_cid - min_cid)
+
+    fig = plotly.graph_objects.Figure()
+    fig.update_layout(
+        title=plotly.graph_objects.layout.Title(
+            text=f"PCA of {model_id} Embeddings ( kept variance: {round(kept_var * 100)}% )"
+        ),
+        xaxis=plotly.graph_objects.layout.XAxis(
+            title=plotly.graph_objects.layout.xaxis.Title(text="Principal Component 1")
+        ),
+        yaxis=plotly.graph_objects.layout.YAxis(
+            title=plotly.graph_objects.layout.yaxis.Title(text="Principal Component 2")
+        ),
+    )
+    if cluster_ids_value is None:
+        fig.add_scatter(
+            x=feature_vector[:, 0], y=feature_vector[:, 1], mode="markers", text=paths
+        )
+    else:
+        texts = [
+            f"{path} ({cluster_id})" for path, cluster_id in zip(paths, cluster_ids)
+        ]
+
+        fig.add_scatter(
+            x=feature_vector[:, 0],
+            y=feature_vector[:, 1],
+            mode="markers",
+            marker_color=cluster_ids_value,
+            marker_colorscale=plotly.colors.sequential.Rainbow,
+            text=texts,
         )
 
-        print(cluster_ids)
-    plt.figure(figsize=(8, 6))
-    for i, data in enumerate(feature_vector):
-        if cluster_ids is None:
-            plt.scatter(data[0], data[1], c="green")
-        else:
-            plt.scatter(data[0], data[1], c=color_map(cluster_ids[i]))
-
-    if feature_vector.shape[0] == len(paths) and len(paths) < 30:
-        for i, path in enumerate(paths):
-            name = os.path.basename(path)
-            name = os.path.splitext(name)[0]
-            plt.annotate(name, (feature_vector[i, 0], feature_vector[i, 1]))
-
-    plt.xlabel("Principal Component 1")
-    plt.ylabel("Principal Component 2")
-    plt.title(
-        f"PCA of {model_id} Embeddings ( kept variance: {round(kept_var * 100)}% )"
-    )
-    plt.savefig(graph_path + ".png")
-    plt.show()
+    plotly.offline.plot(fig, filename=graph_path + ".html")
