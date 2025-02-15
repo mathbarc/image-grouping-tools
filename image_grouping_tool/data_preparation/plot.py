@@ -19,9 +19,9 @@ def scatterplot_samples(
         max_cid = max(cluster_ids)
 
         if max_cid - min_cid < 1:
-            cluster_ids = None
+            cluster_ids_value = None
         else:
-            cluster_ids = (cluster_ids - min_cid) / (max_cid - min_cid)
+            cluster_ids_value = (cluster_ids - min_cid) / (max_cid - min_cid)
 
     fig = plotly.graph_objects.Figure()
     fig.update_layout(
@@ -35,18 +35,22 @@ def scatterplot_samples(
             title=plotly.graph_objects.layout.yaxis.Title(text="Principal Component 2")
         ),
     )
-    if cluster_ids is None:
+    if cluster_ids_value is None:
         fig.add_scatter(
             x=feature_vector[:, 0], y=feature_vector[:, 1], mode="markers", text=paths
         )
     else:
+        texts = [
+            f"{path} ({cluster_id})" for path, cluster_id in zip(paths, cluster_ids)
+        ]
+
         fig.add_scatter(
             x=feature_vector[:, 0],
             y=feature_vector[:, 1],
             mode="markers",
-            marker_color=cluster_ids,
+            marker_color=cluster_ids_value,
             marker_colorscale=plotly.colors.sequential.Rainbow,
-            text=paths,
+            text=texts,
         )
 
     plotly.offline.plot(fig, filename=graph_path + ".html")
