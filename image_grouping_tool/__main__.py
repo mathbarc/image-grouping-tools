@@ -1,5 +1,6 @@
 from image_grouping_tool import __version__
 from image_grouping_tool.dataset import ImageFolderDataset
+from image_grouping_tool.clustering.similarity import get_distances
 from image_grouping_tool.image_descriptors import build_model, generate_feature_list
 from image_grouping_tool.data_preparation import (
     pca,
@@ -150,3 +151,27 @@ def cluster(
             out_path,
             result,
         )
+
+
+@cli.command(name="compute_distances")
+@click.argument("features_path", nargs=1, type=str)
+@click.option("--images", "-i", type=(str), multiple=True, required=True)
+@click.option(
+    "--dist",
+    required=False,
+    help="Distance to compute similary: euclidian[default], cosine, minkowski or mahalanobis",
+    default="euclidian",
+    type=str,
+)
+
+@click.option(
+    "--output", required=False, help="Output file", default="./features.pt", type=str
+)
+def compute_distances(features_path: str, images: tuple, dist: str, output: str):
+    data = torch.load(features_path, weights_only=False)
+    distances, sorted_idx = get_distances(data, images, dist)
+    data[f"{dist}-distances"] = distances
+    data[f"{dist}-reference_images"] = images
+    data[f"{dist}-sorted_idx"] = sorted_idx
+    torch.save(data, output)
+    return data

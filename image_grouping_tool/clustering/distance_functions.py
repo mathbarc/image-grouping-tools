@@ -67,3 +67,7 @@ class minkowski_distance:
         dist_vector = numpy.abs(first - second)
         dist_vector = numpy.atleast_2d(dist_vector)
         return pow(pow(dist_vector, self.power).sum(axis=1), self.ratio)
+
+
+def mahalanobis_distance(first: numpy.ndarray, second: numpy.ndarray):
+  pass
