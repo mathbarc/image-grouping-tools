@@ -1,7 +1,9 @@
 from image_grouping_tool import __version__
 from image_grouping_tool.dataset import ImageFolderDataset
 from image_grouping_tool.clustering.similarity import get_distances
+from image_grouping_tool.clustering.diversity import get_n_diverse_images
 from image_grouping_tool.image_descriptors import build_model, generate_feature_list
+from image_grouping_tool.data_preparation.plot import plot_diverse_images
 from image_grouping_tool.data_preparation import (
     pca,
     scatterplot_samples,
@@ -175,3 +177,31 @@ def compute_distances(features_path: str, images: tuple, dist: str, output: str)
     data[f"{dist}-sorted_idx"] = sorted_idx
     torch.save(data, output)
     return data
+
+
+@cli.command(name="get_diversity")
+@click.argument("features_path", nargs=1, type=str)
+@click.option("--number", "-n", type=(int), multiple=False, 
+              required=True, help="Get the n more diverse samples on Dataset.")
+@click.option("--distance", "-d", type=(str), multiple=False, default="euclidian",
+              required=False, help="Distance to compute diversity: euclidian[default], cosine, minkowski or mahalanobis.")
+@click.option(
+    "--output", required=False, help="Output file", default="./features.pt", type=str
+)
+def get_diversity(features_path: str, number: int, distance: str, output: str):
+    data = torch.load(features_path, weights_only=False)
+    images_idx = get_n_diverse_images(data['features'], number, distance)
+    data[f"diverse_images"] = images_idx
+    torch.save(data, output)
+    return data
+
+
+@cli.command(name="plot_diversity")
+@click.argument("features_path", nargs=1, type=str)
+@click.argument("save_path", nargs=1, type=str, default="./diversity_plot.html")
+
+def plot_diversity(features_path: str, save_path: str):
+    data = torch.load(features_path, weights_only=False)
+    pca_features, kept_variance = pca(data['features'].numpy(), 2)
+    plot_diverse_images(pca_features, data, save_path)
+

@@ -19,6 +19,8 @@ class ImageFolderDataset(Dataset):
         self.image_list.extend(data_path.glob("**/*.png"))
         self.image_list.extend(data_path.glob("**/*.jpeg"))
         self.image_list.extend(data_path.glob("**/*.jpg"))
+        self.image_list.extend(data_path.glob("**/*.JPG"))
+        self.image_list.extend(data_path.glob("**/*.JPEG"))
         self.transform = transform
 
     def __getitem__(self, idx) -> torch.Tensor:

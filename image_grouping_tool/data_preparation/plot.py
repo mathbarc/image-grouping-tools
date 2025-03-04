@@ -14,6 +14,7 @@ def scatterplot_samples(
     graph_path: str,
     cluster_ids: Optional[List[int]] = None,
 ):
+    cluster_ids_value = None
     if cluster_ids is not None:
         min_cid = min(cluster_ids)
         max_cid = max(cluster_ids)
@@ -54,3 +55,11 @@ def scatterplot_samples(
         )
 
     plotly.offline.plot(fig, filename=graph_path + ".html")
+
+
+def plot_diverse_images(pca_features, data, save_path: str):
+    centers = pca_features[data["diverse_images"]]
+    fig = plotly.graph_objects.Figure()
+    fig.add_scatter(x=pca_features[:,0], y=pca_features[:,1], mode="markers", name="Images")
+    fig.add_scatter(x=centers[:,0], y=centers[:,1], mode="markers", name="More Diverse Images")
+    plotly.offline.plot(fig, save_path)
