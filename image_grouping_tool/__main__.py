@@ -159,7 +159,7 @@ def cluster(
 @click.argument("features_path", nargs=1, type=str)
 @click.option("--images", "-i", type=(str), multiple=True, required=True)
 @click.option(
-    "--dist",
+    "--dist", '-d',
     required=False,
     help="Distance to compute similary: euclidian[default], cosine, minkowski or mahalanobis",
     default="euclidian",
@@ -167,7 +167,7 @@ def cluster(
 )
 
 @click.option(
-    "--output", required=False, help="Output file", default="./features.pt", type=str
+    "--output", "-o", required=False, help="Output file", default="./features.pt", type=str
 )
 def compute_distances(features_path: str, images: tuple, dist: str, output: str):
     data = torch.load(features_path, weights_only=False)
