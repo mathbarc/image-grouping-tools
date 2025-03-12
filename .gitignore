@@ -7,3 +7,4 @@ image_grouping_tool.egg-info/
 **.png
 venv/
 build/
+test.sh
