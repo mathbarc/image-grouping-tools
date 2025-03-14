@@ -1,4 +1,4 @@
-from image_grouping_tool import __version__
+# from image_grouping_tool import __version__
 from image_grouping_tool.dataset import ImageFolderDataset
 from image_grouping_tool.clustering.similarity import get_distances
 from image_grouping_tool.clustering.diversity import get_n_diverse_images
@@ -12,10 +12,11 @@ from image_grouping_tool.data_preparation import (
 import click
 import torch
 import os
+import shutil
 
 
 @click.group()
-@click.version_option(__version__, message="%(version)s")
+# @click.version_option(__version__, message="%(version)s")
 def cli():
     pass
 
@@ -159,15 +160,20 @@ def cluster(
 @click.argument("features_path", nargs=1, type=str)
 @click.option("--images", "-i", type=(str), multiple=True, required=True)
 @click.option(
-    "--dist", '-d',
+    "--dist",
+    "-d",
     required=False,
     help="Distance to compute similary: euclidian[default], cosine, minkowski or mahalanobis",
     default="euclidian",
     type=str,
 )
-
 @click.option(
-    "--output", "-o", required=False, help="Output file", default="./features.pt", type=str
+    "--output",
+    "-o",
+    required=False,
+    help="Output file",
+    default="./features.pt",
+    type=str,
 )
 def compute_distances(features_path: str, images: tuple, dist: str, output: str):
     data = torch.load(features_path, weights_only=False)
@@ -181,27 +187,60 @@ def compute_distances(features_path: str, images: tuple, dist: str, output: str)
 
 @cli.command(name="get_diversity")
 @click.argument("features_path", nargs=1, type=str)
-@click.option("--number", "-n", type=(int), multiple=False, 
-              required=True, help="Get the n more diverse samples on Dataset.")
-@click.option("--distance", "-d", type=(str), multiple=False, default="euclidian",
-              required=False, help="Distance to compute diversity: euclidian[default], cosine, minkowski or mahalanobis.")
+@click.option(
+    "--number",
+    "-n",
+    type=(int),
+    multiple=False,
+    required=True,
+    help="Get the n more diverse samples on Dataset.",
+)
+@click.option(
+    "--distance",
+    "-d",
+    type=(str),
+    multiple=False,
+    default="euclidian",
+    required=False,
+    help="Distance to compute diversity: euclidian[default], cosine, minkowski or mahalanobis.",
+)
 @click.option(
     "--output", required=False, help="Output file", default="./features.pt", type=str
 )
-def get_diversity(features_path: str, number: int, distance: str, output: str):
+@click.option(
+    "--dest_folder",
+    required=False,
+    help="Folder to store most diverse images",
+    default=None,
+    type=str,
+)
+def get_diversity(
+    features_path: str, number: int, distance: str, output: str, dest_folder: str
+):
     data = torch.load(features_path, weights_only=False)
-    images_idx = get_n_diverse_images(data['features'], number, distance)
+    images_idx = get_n_diverse_images(data["features"], number, distance)
     data[f"diverse_images"] = images_idx
     torch.save(data, output)
+
+    if dest_folder is not None:
+        if os.path.exists(dest_folder):
+            shutil.rmtree(dest_folder)
+
+        os.makedirs(dest_folder, exist_ok=True)
+
+        for idx in images_idx:
+            path: str = data["paths"][idx]
+            filename = os.path.basename(path)
+            dest_path = os.path.join(dest_folder, filename)
+            shutil.copy(path, dest_path)
+
     return data
 
 
 @cli.command(name="plot_diversity")
 @click.argument("features_path", nargs=1, type=str)
 @click.argument("save_path", nargs=1, type=str, default="./diversity_plot.html")
-
 def plot_diversity(features_path: str, save_path: str):
     data = torch.load(features_path, weights_only=False)
-    pca_features, kept_variance = pca(data['features'].numpy(), 2)
+    pca_features, kept_variance = pca(data["features"].numpy(), 2)
     plot_diverse_images(pca_features, data, save_path)
-
