@@ -1,3 +1,4 @@
+from torch.cuda import is_available
 from . import efficientnet_v2
 from . import resnet
 
@@ -7,6 +8,7 @@ import torchvision
 
 import os
 import tqdm
+import cpuinfo
 
 
 def build_model(
@@ -14,12 +16,30 @@ def build_model(
 ) -> Tuple[torch.nn.Sequential, int, torchvision.transforms.Compose]:
     if model_identifier == "resnet50":
         descriptor, feature_size = resnet.resnet50_descriptor()
-        return descriptor, feature_size, resnet.resnet50_transform()
+        return optimize_model(descriptor), feature_size, resnet.resnet50_transform()
     elif model_identifier == "efficientnet_v2_m":
         descriptor, feature_size = efficientnet_v2.efficientnet_v2_m_descriptor()
-        return descriptor, feature_size, efficientnet_v2.efficientnet_v2_m_transform()
+        return (
+            optimize_model(descriptor),
+            feature_size,
+            efficientnet_v2.efficientnet_v2_m_transform(),
+        )
     else:
         raise Exception(f"Invalid model {model_identifier}")
+
+
+def optimize_model(model: torch.nn.Sequential):
+    if torch.cuda.is_available():
+        model = model.to(torch.device("cuda"))
+    else:
+        model = model.to("cpu")
+        vendor = cpuinfo.get_cpu_info()["vendor_id_raw"]
+        if vendor == "GenuineIntel":
+            import intel_extension_for_pytorch as ipex
+
+            model = ipex.optimize(model)
+
+    return model
 
 
 def generate_feature_list(
@@ -29,7 +49,6 @@ def generate_feature_list(
     device=torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"),
 ):
     with torch.no_grad():
-        descriptor = descriptor.to(device)
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
 
         feature_list = torch.Tensor()

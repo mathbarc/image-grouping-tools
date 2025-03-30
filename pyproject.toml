@@ -18,6 +18,8 @@ dependencies = [
     "plotly",
     "click",
     "tqdm",
+    "py-cpuinfo",
+    "intel_extension_for_pytorch",
 ]
 
 [project.urls]
