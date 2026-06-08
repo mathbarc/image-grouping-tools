@@ -38,10 +38,19 @@ def cli():
     type=str,
 )
 @click.option(
+    "--device",
+    required=False,
+    help="Device used for model inference ( cpu | cuda:0 | cuda:1 )",
+    default="cpu",
+)
+@click.option(
     "--output", required=False, help="Output file", default="./features.pt", type=str
 )
-def compute_features(image_folder: str, batch_size: int, model_id: str, output: str):
-    model, _, transform = build_model(model_id)
+def compute_features(
+    image_folder: str, batch_size: int, model_id: str, device: str, output: str
+):
+    dev = torch.device(device)
+    model, _, transform = build_model(model_id, dev)
     image_data = ImageFolderDataset(image_folder, transform)
     features = generate_feature_list(image_data, model, batch_size)
     data = {"features": features, "paths": image_data.image_list, "model_id": model_id}
