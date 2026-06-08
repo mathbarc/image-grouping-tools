@@ -10,16 +10,24 @@ import tqdm
 
 
 def build_model(
-    model_identifier: str,
+    model_identifier: str, device=torch.device("cpu")
 ) -> Tuple[torch.nn.Sequential, int, torchvision.transforms.Compose]:
+
+    descriptor = None
+    feature_size = 0
+    transform = None
+
     if model_identifier == "resnet50":
         descriptor, feature_size = resnet.resnet50_descriptor()
-        return descriptor, feature_size, resnet.resnet50_transform()
+        transform = resnet.resnet50_transform()
     elif model_identifier == "efficientnet_v2_m":
         descriptor, feature_size = efficientnet_v2.efficientnet_v2_m_descriptor()
-        return descriptor, feature_size, efficientnet_v2.efficientnet_v2_m_transform()
+        transform = efficientnet_v2.efficientnet_v2_m_transform()
     else:
         raise Exception(f"Invalid model {model_identifier}")
+
+    descriptor = descriptor.to(device)
+    return descriptor, feature_size, transform
 
 
 def generate_feature_list(
